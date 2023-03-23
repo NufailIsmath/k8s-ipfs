@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ipfs-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: ipfs.niftron.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: ipfs-service
+                port:
+                  name: api
+          - path: /gateway
+            pathType: Prefix
+            backend:
+              service:
+                name: ipfs-service
+                port:
+                  name: gateway
+          - path: /swarm
+            pathType: Prefix
+            backend:
+              service:
+                name: ipfs-service
+                port:
+                  name: swarm

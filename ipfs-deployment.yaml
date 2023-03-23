@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ipfs
+spec:
+  selector:
+    matchLabels:
+      app: ipfs
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ipfs
+    spec:
+      containers:
+        - name: ipfs
+          image: ipfs/go-ipfs:v0.10.0
+          ports:
+            - name: api
+              containerPort: 5001
+            - name: gateway
+              containerPort: 8080
+            - name: swarm
+              containerPort: 4001
+          volumeMounts:
+            - name: ipfs-data
+              mountPath: /data/ipfs
+            - name: ipfs-config
+              mountPath: /root/.ipfs
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080 && ipfs config --json Gateway.APICommands null && ipfs config --json Gateway.HTTPHeaders '{\"Access-Control-Allow-Headers\": [\"X-Requested-With\", \"Access-Control-Expose-Headers\", \"Range\", \"User-Agent\"], \"Access-Control-Expose-Headers\": [\"Location\", \"Ipfs-Hash\"], \"Access-Control-Allow-Methods\": [\"POST\", \"GET\"], \"Access-Control-Allow-Origin\": [\"*\"], \"X-Special-Header\": [\"Access-Control-Expose-Headers: Ipfs-Hash\"]}' && ipfs daemon"
+      volumes:
+        - name: ipfs-data
+          persistentVolumeClaim:
+            claimName: ipfs-pvc
+        - name: ipfs-config
+          configMap:
+            name: ipfs-config
